@@ -34,6 +34,7 @@ import StyledTooltip from '../../StyledTooltip';
 import { H3, P } from '../../Text';
 import { TOAST_TYPE, withToasts } from '../../ToastProvider';
 import { withUser } from '../../UserProvider';
+import { RegisterWebAuthnDeviceButton } from '../RegisterWebAuthnDeviceButton';
 
 const messages = defineMessages({
   errorWrongLength: {
@@ -438,6 +439,7 @@ class UserSecurity extends React.Component {
             {error}
           </MessageBox>
         )}
+        <RegisterWebAuthnDeviceButton account={{ id: account.id }} />
         <Flex flexDirection="column">
           {doesAccountAlreadyHave2FA && !enablingTwoFactorAuth ? (
             <Fragment>
@@ -749,6 +751,13 @@ const addTwoFactorAuthToIndividualMutation = gql`
       account {
         id
         hasTwoFactorAuth
+        twoFactorMethods {
+          id
+          method
+          createdAt
+          description
+          icon
+        }
       }
       recoveryCodes
     }
@@ -760,6 +769,13 @@ const removeTwoFactorAuthFromIndividualMutation = gql`
     removeTwoFactorAuthTokenFromIndividual(account: $account) {
       id
       hasTwoFactorAuth
+      twoFactorMethods {
+        id
+        method
+        createdAt
+        description
+        icon
+      }
     }
   }
 `;
@@ -776,6 +792,13 @@ const accountHasTwoFactorAuthQuery = gql`
       name
       type
       hasTwoFactorAuth
+      twoFactorMethods {
+        id
+        method
+        createdAt
+        description
+        icon
+      }
     }
   }
 `;

@@ -1,4 +1,5 @@
 import React from 'react';
+import * as simplewebauthn from '@simplewebauthn/browser';
 import { useRouter } from 'next/router';
 import { FormattedMessage } from 'react-intl';
 
@@ -14,8 +15,10 @@ import StyledButton from '../StyledButton';
 import StyledInput from '../StyledInput';
 import StyledModal, { ModalFooter, ModalHeader } from '../StyledModal';
 import { Label, P } from '../Text';
+import { TOAST_TYPE, useToasts } from '../ToastProvider';
 
 export default function TwoFactorAuthenticationModal() {
+  const { addToast } = useToasts();
   const { LoggedInUser } = useLoggedInUser();
   const [twoFactorCode, setTwoFactorCode] = React.useState('');
   const [confirming, setConfirming] = React.useState(false);
@@ -27,6 +30,7 @@ export default function TwoFactorAuthenticationModal() {
   const hasYubikeyOTP = supportedMethods.includes('yubikey_otp');
   const hasRecoveryCodeOption = supportedMethods.includes('recovery_code');
   const has2FAConfigured = supportedMethods.length > 0;
+  const hasWebauthn = supportedMethods.includes('webauthn');
   const cancellable = !supportedMethods.includes('recovery_code');
 
   React.useEffect(() => {
@@ -80,6 +84,23 @@ export default function TwoFactorAuthenticationModal() {
       confirm();
     }
   }, [confirm, twoFactorCode, hasYubikeyOTP]);
+
+  const useWebAuthn = React.useCallback(async () => {
+    try {
+      const authenticationResponse = await simplewebauthn.startAuthentication(prompt.authenticationOptions.webauthn);
+      const base64AuthenticationResponse = Buffer.from(JSON.stringify(authenticationResponse), 'utf8').toString(
+        'base64',
+      );
+
+      prompt.resolveAuth({
+        type: 'webauthn',
+        code: base64AuthenticationResponse,
+      });
+    } catch (e) {
+      addToast({ type: TOAST_TYPE.ERROR, message: e.message });
+      return;
+    }
+  }, [prompt]);
 
   const header = has2FAConfigured ? (
     isUsingRecoveryCode ? (
@@ -151,6 +172,7 @@ export default function TwoFactorAuthenticationModal() {
               }}
               autoFocus
             />
+            {hasWebauthn && !isUsingRecoveryCode && <StyledButton onClick={useWebAuthn}>Use webauthn</StyledButton>}
             {hasRecoveryCodeOption && !isUsingRecoveryCode && (
               <Box mt={4}>
                 <P fontWeight="bold" fontSize={14} mb={1} textAlign="left" display="block">
