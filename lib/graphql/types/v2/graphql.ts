@@ -26,6 +26,8 @@ export type Scalars = {
   NonEmptyString: any;
   /** A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt. */
   URL: any;
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: any;
 };
 
 /** Account interface shared by all kind of accounts (Bot, Collective, Event, User, Organization) */
@@ -597,6 +599,8 @@ export type AccountWithHost = {
   approvedAt?: Maybe<Scalars['DateTime']>;
   /** Returns the Fiscal Host */
   host?: Maybe<Host>;
+  /** Returns agreements this account has with its host */
+  hostAgreements: AgreementCollection;
   /** Fees percentage that the host takes for this collective */
   hostFeePercent?: Maybe<Scalars['Float']>;
   /** Describe how the host charges the collective */
@@ -607,6 +611,13 @@ export type AccountWithHost = {
   isApproved: Scalars['Boolean'];
   /** Fees percentage that the platform takes for this collective */
   platformFeePercent?: Maybe<Scalars['Float']>;
+};
+
+
+/** An account that can be hosted by a Host */
+export type AccountWithHostHostAgreementsArgs = {
+  limit?: Scalars['Int'];
+  offset?: Scalars['Int'];
 };
 
 
@@ -745,8 +756,9 @@ export enum ActivityAndClassesType {
   SUBSCRIPTION_CONFIRMED = 'SUBSCRIPTION_CONFIRMED',
   TAXFORM_REQUEST = 'TAXFORM_REQUEST',
   TICKET_CONFIRMED = 'TICKET_CONFIRMED',
-  TWO_FACTOR_CODE_ADDED = 'TWO_FACTOR_CODE_ADDED',
-  TWO_FACTOR_CODE_DELETED = 'TWO_FACTOR_CODE_DELETED',
+  TWO_FACTOR_CODE_REQUESTED = 'TWO_FACTOR_CODE_REQUESTED',
+  TWO_FACTOR_METHOD_ADDED = 'TWO_FACTOR_METHOD_ADDED',
+  TWO_FACTOR_METHOD_DELETED = 'TWO_FACTOR_METHOD_DELETED',
   UPDATE_COMMENT_CREATED = 'UPDATE_COMMENT_CREATED',
   USER_CARD_CLAIMED = 'USER_CARD_CLAIMED',
   USER_CARD_INVITED = 'USER_CARD_INVITED',
@@ -890,8 +902,9 @@ export enum ActivityType {
   SUBSCRIPTION_CONFIRMED = 'SUBSCRIPTION_CONFIRMED',
   TAXFORM_REQUEST = 'TAXFORM_REQUEST',
   TICKET_CONFIRMED = 'TICKET_CONFIRMED',
-  TWO_FACTOR_CODE_ADDED = 'TWO_FACTOR_CODE_ADDED',
-  TWO_FACTOR_CODE_DELETED = 'TWO_FACTOR_CODE_DELETED',
+  TWO_FACTOR_CODE_REQUESTED = 'TWO_FACTOR_CODE_REQUESTED',
+  TWO_FACTOR_METHOD_ADDED = 'TWO_FACTOR_METHOD_ADDED',
+  TWO_FACTOR_METHOD_DELETED = 'TWO_FACTOR_METHOD_DELETED',
   UPDATE_COMMENT_CREATED = 'UPDATE_COMMENT_CREATED',
   USER_CARD_CLAIMED = 'USER_CARD_CLAIMED',
   USER_CARD_INVITED = 'USER_CARD_INVITED',
@@ -916,6 +929,34 @@ export type AddTwoFactorAuthTokenToIndividualResponse = {
   account: Individual;
   /** The recovery codes for the Individual to write down */
   recoveryCodes?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+/** An agreement */
+export type Agreement = {
+  __typename?: 'Agreement';
+  account: Account;
+  attachment?: Maybe<FileInfo>;
+  createdBy: Account;
+  expiresAt?: Maybe<Scalars['DateTime']>;
+  host: Host;
+  id?: Maybe<Scalars['String']>;
+  title: Scalars['String'];
+};
+
+/** A collection of "Agreement" */
+export type AgreementCollection = Collection & {
+  __typename?: 'AgreementCollection';
+  limit?: Maybe<Scalars['Int']>;
+  nodes?: Maybe<Array<Agreement>>;
+  offset?: Maybe<Scalars['Int']>;
+  totalCount?: Maybe<Scalars['Int']>;
+};
+
+export type AgreementReferenceInput = {
+  /** The public id identifying the agreement (ie: dgm9bnk8-0437xqry-ejpvzeol-jdayw5re) */
+  id?: InputMaybe<Scalars['String']>;
+  /** The internal id of the agreement (ie: 580) */
+  legacyId?: InputMaybe<Scalars['Int']>;
 };
 
 /** A financial amount. */
@@ -1368,6 +1409,8 @@ export type Collective = Account & AccountWithContributions & AccountWithHost & 
   githubHandle?: Maybe<Scalars['String']>;
   /** Returns the Fiscal Host */
   host?: Maybe<Host>;
+  /** Returns agreements this account has with its host */
+  hostAgreements: AgreementCollection;
   /** Fees percentage that the host takes for this collective */
   hostFeePercent?: Maybe<Scalars['Float']>;
   /** Describe how the host charges the collective */
@@ -1497,6 +1540,13 @@ export type CollectiveConversationsTagsArgs = {
 /** This represents a Collective account */
 export type CollectiveExpensesTagsArgs = {
   limit?: Scalars['Int'];
+};
+
+
+/** This represents a Collective account */
+export type CollectiveHostAgreementsArgs = {
+  limit?: Scalars['Int'];
+  offset?: Scalars['Int'];
 };
 
 
@@ -1844,6 +1894,7 @@ export enum ConnectedAccountService {
   /** @deprecated Not using this service anymore */
   meetup = 'meetup',
   paypal = 'paypal',
+  /** @deprecated Not using this service anymore */
   privacy = 'privacy',
   stripe = 'stripe',
   stripe_customer = 'stripe_customer',
@@ -3033,6 +3084,8 @@ export type Event = Account & AccountWithContributions & AccountWithHost & Accou
   githubHandle?: Maybe<Scalars['String']>;
   /** Returns the Fiscal Host */
   host?: Maybe<Host>;
+  /** Returns agreements this account has with its host */
+  hostAgreements: AgreementCollection;
   /** Fees percentage that the host takes for this collective */
   hostFeePercent?: Maybe<Scalars['Float']>;
   /** Describe how the host charges the collective */
@@ -3168,6 +3221,13 @@ export type EventConversationsTagsArgs = {
 /** This represents an Event account */
 export type EventExpensesTagsArgs = {
   limit?: Scalars['Int'];
+};
+
+
+/** This represents an Event account */
+export type EventHostAgreementsArgs = {
+  limit?: Scalars['Int'];
+  offset?: Scalars['Int'];
 };
 
 
@@ -3883,6 +3943,8 @@ export type Fund = Account & AccountWithContributions & AccountWithHost & {
   githubHandle?: Maybe<Scalars['String']>;
   /** Returns the Fiscal Host */
   host?: Maybe<Host>;
+  /** Returns agreements this account has with its host */
+  hostAgreements: AgreementCollection;
   /** Fees percentage that the host takes for this collective */
   hostFeePercent?: Maybe<Scalars['Float']>;
   /** Describe how the host charges the collective */
@@ -4012,6 +4074,13 @@ export type FundConversationsTagsArgs = {
 /** This represents an Project account */
 export type FundExpensesTagsArgs = {
   limit?: Scalars['Int'];
+};
+
+
+/** This represents an Project account */
+export type FundHostAgreementsArgs = {
+  limit?: Scalars['Int'];
+  offset?: Scalars['Int'];
 };
 
 
@@ -4257,6 +4326,8 @@ export type Host = Account & AccountWithContributions & {
   hostFeePercent?: Maybe<Scalars['Float']>;
   hostMetrics: HostMetrics;
   hostMetricsTimeSeries: HostMetricsTimeSeries;
+  /** Returns agreements with Hosted Accounts */
+  hostedAccountAgreements: AgreementCollection;
   hostedVirtualCardCollectives: AccountCollection;
   hostedVirtualCardMerchants: AccountCollection;
   hostedVirtualCards: VirtualCardCollection;
@@ -4438,6 +4509,14 @@ export type HostHostMetricsTimeSeriesArgs = {
   dateFrom?: InputMaybe<Scalars['DateTime']>;
   dateTo?: InputMaybe<Scalars['DateTime']>;
   timeUnit?: InputMaybe<TimeUnit>;
+};
+
+
+/** This represents an Host account */
+export type HostHostedAccountAgreementsArgs = {
+  accounts?: InputMaybe<Array<InputMaybe<AccountReferenceInput>>>;
+  limit?: Scalars['Int'];
+  offset?: Scalars['Int'];
 };
 
 
@@ -4894,6 +4973,8 @@ export type Individual = Account & {
   transferwise?: Maybe<TransferWise>;
   /** @deprecated 2023-01-16: Please use socialLinks */
   twitterHandle?: Maybe<Scalars['String']>;
+  /** User two factor methods */
+  twoFactorMethods?: Maybe<Array<Maybe<UserTwoFactorMethod>>>;
   type: AccountType;
   updatedAt?: Maybe<Scalars['DateTime']>;
   /** Updates published by the account. To see unpublished updates, you need to be an admin and have the scope "updates". */
@@ -5303,6 +5384,8 @@ export type MergeAccountsResponse = {
 /** This is the root mutation */
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Add an agreement for the given host account. Scope: "host". */
+  addAgreement: Agreement;
   /** Add a new payment method to be used with an Order. Scope: "orders". */
   addCreditCard: CreditCardWithStripeError;
   /** Add an emoji reaction. Scope: "conversations", "expenses" or "updates". */
@@ -5368,10 +5451,14 @@ export type Mutation = {
   createUpdate: Update;
   /** Create new Stripe Virtual Card for existing hosted collective. Scope: "virtualCards". */
   createVirtualCard: VirtualCard;
+  /** Create WebAuthn public key registration request options */
+  createWebAuthnRegistrationOptions: Scalars['JSON'];
   /** Create webhook. Scope: "webhooks". */
   createWebhook?: Maybe<Webhook>;
   /** Adds or removes a policy on a given account. Scope: "account". */
   deleteAccount?: Maybe<Account>;
+  /** Delete an agreement for the given host account. Scope: "host". */
+  deleteAgreement: Agreement;
   deleteApplication?: Maybe<Application>;
   deleteComment?: Maybe<Comment>;
   /** Delete ConnectedAccount. Scope: "connectedAccounts". */
@@ -5401,6 +5488,8 @@ export type Mutation = {
   editAccountSetting: Account;
   /** [Root only] Edits account type from User to Organization */
   editAccountType: Account;
+  /** Edit an agreement for the given host account. Scope: "host". */
+  editAgreement: Agreement;
   /** Edit a comment. Scope: "conversations", "expenses" or "updates". */
   editComment?: Maybe<Comment>;
   /** Edit a conversation. Scope: "conversations". */
@@ -5494,6 +5583,16 @@ export type Mutation = {
   updateWebhook?: Maybe<Webhook>;
   /** To verify and unverified expense. Scope: "expenses". */
   verifyExpense: Expense;
+};
+
+
+/** This is the root mutation */
+export type MutationAddAgreementArgs = {
+  account: AccountReferenceInput;
+  attachment?: InputMaybe<Scalars['Upload']>;
+  expiresAt?: InputMaybe<Scalars['DateTime']>;
+  host: AccountReferenceInput;
+  title: Scalars['NonEmptyString'];
 };
 
 
@@ -5749,6 +5848,12 @@ export type MutationCreateVirtualCardArgs = {
 
 
 /** This is the root mutation */
+export type MutationCreateWebAuthnRegistrationOptionsArgs = {
+  account: AccountReferenceInput;
+};
+
+
+/** This is the root mutation */
 export type MutationCreateWebhookArgs = {
   webhook: WebhookCreateInput;
 };
@@ -5757,6 +5862,12 @@ export type MutationCreateWebhookArgs = {
 /** This is the root mutation */
 export type MutationDeleteAccountArgs = {
   account: AccountReferenceInput;
+};
+
+
+/** This is the root mutation */
+export type MutationDeleteAgreementArgs = {
+  agreement: AgreementReferenceInput;
 };
 
 
@@ -5864,6 +5975,14 @@ export type MutationEditAccountSettingArgs = {
 /** This is the root mutation */
 export type MutationEditAccountTypeArgs = {
   account: AccountReferenceInput;
+};
+
+
+/** This is the root mutation */
+export type MutationEditAgreementArgs = {
+  agreement: AgreementReferenceInput;
+  expiresAt?: InputMaybe<Scalars['DateTime']>;
+  title?: InputMaybe<Scalars['NonEmptyString']>;
 };
 
 
@@ -7345,6 +7464,8 @@ export type Project = Account & AccountWithContributions & AccountWithHost & Acc
   githubHandle?: Maybe<Scalars['String']>;
   /** Returns the Fiscal Host */
   host?: Maybe<Host>;
+  /** Returns agreements this account has with its host */
+  hostAgreements: AgreementCollection;
   /** Fees percentage that the host takes for this collective */
   hostFeePercent?: Maybe<Scalars['Float']>;
   /** Describe how the host charges the collective */
@@ -7476,6 +7597,13 @@ export type ProjectConversationsTagsArgs = {
 /** This represents an Project account */
 export type ProjectExpensesTagsArgs = {
   limit?: Scalars['Int'];
+};
+
+
+/** This represents an Project account */
+export type ProjectHostAgreementsArgs = {
+  limit?: Scalars['Int'];
+  offset?: Scalars['Int'];
 };
 
 
@@ -8578,6 +8706,7 @@ export type TransferWiseRequiredField = {
 /** A two factor authentication method */
 export enum TwoFactorMethod {
   TOTP = 'TOTP',
+  WEBAUTHN = 'WEBAUTHN',
   YUBIKEY_OTP = 'YUBIKEY_OTP'
 }
 
@@ -8713,6 +8842,16 @@ export type UpdatesCollection = Collection & {
   totalCount?: Maybe<Scalars['Int']>;
 };
 
+/** User two factor authentication method */
+export type UserTwoFactorMethod = {
+  __typename?: 'UserTwoFactorMethod';
+  createdAt: Scalars['DateTime'];
+  description?: Maybe<Scalars['String']>;
+  icon?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  method: TwoFactorMethod;
+};
+
 /** This represents a Vendor account */
 export type Vendor = Account & AccountWithContributions & AccountWithHost & {
   __typename?: 'Vendor';
@@ -8746,6 +8885,8 @@ export type Vendor = Account & AccountWithContributions & AccountWithHost & {
   githubHandle?: Maybe<Scalars['String']>;
   /** Returns the Fiscal Host */
   host?: Maybe<Host>;
+  /** Returns agreements this account has with its host */
+  hostAgreements: AgreementCollection;
   /** Fees percentage that the host takes for this collective */
   hostFeePercent?: Maybe<Scalars['Float']>;
   /** Describe how the host charges the collective */
@@ -8875,6 +9016,13 @@ export type VendorConversationsTagsArgs = {
 /** This represents a Vendor account */
 export type VendorExpensesTagsArgs = {
   limit?: Scalars['Int'];
+};
+
+
+/** This represents a Vendor account */
+export type VendorHostAgreementsArgs = {
+  limit?: Scalars['Int'];
+  offset?: Scalars['Int'];
 };
 
 

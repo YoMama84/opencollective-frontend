@@ -4454,8 +4454,8 @@ enum ActivityType {
   USER_SIGNIN
   USER_RESET_PASSWORD
   OAUTH_APPLICATION_AUTHORIZED
-  TWO_FACTOR_CODE_ADDED
-  TWO_FACTOR_CODE_DELETED
+  TWO_FACTOR_METHOD_ADDED
+  TWO_FACTOR_METHOD_DELETED
   TWO_FACTOR_CODE_REQUESTED
   USER_CHANGE_EMAIL
   USER_PAYMENT_METHOD_CREATED
@@ -8052,6 +8052,11 @@ type Individual implements Account {
   Has the account a password set? For authenticated user: scope: "account".
   """
   hasPassword: Boolean
+
+  """
+  User two factor methods
+  """
+  twoFactorMethods: [UserTwoFactorMethod]
 }
 
 """
@@ -8117,6 +8122,26 @@ type PersonalToken {
   The date on which the personal token was last updated
   """
   updatedAt: DateTime
+}
+
+"""
+User two factor authentication method
+"""
+type UserTwoFactorMethod {
+  id: String!
+  method: TwoFactorMethod!
+  createdAt: DateTime!
+  description: String
+  icon: String
+}
+
+"""
+A two factor authentication method
+"""
+enum TwoFactorMethod {
+  TOTP
+  YUBIKEY_OTP
+  WEBAUTHN
 }
 
 """
@@ -11626,8 +11651,8 @@ enum ActivityAndClassesType {
   USER_SIGNIN
   USER_RESET_PASSWORD
   OAUTH_APPLICATION_AUTHORIZED
-  TWO_FACTOR_CODE_ADDED
-  TWO_FACTOR_CODE_DELETED
+  TWO_FACTOR_METHOD_ADDED
+  TWO_FACTOR_METHOD_DELETED
   TWO_FACTOR_CODE_REQUESTED
   USER_CHANGE_EMAIL
   USER_PAYMENT_METHOD_CREATED
@@ -13235,6 +13260,16 @@ type Mutation {
   ): Account!
 
   """
+  Create WebAuthn public key registration request options
+  """
+  createWebAuthnRegistrationOptions(
+    """
+    Account that will create a WebAuthn registration
+    """
+    account: AccountReferenceInput!
+  ): JSON!
+
+  """
   Add 2FA to the Individual if it does not have it. Scope: "account".
   """
   addTwoFactorAuthTokenToIndividual(
@@ -14644,14 +14679,6 @@ type AddTwoFactorAuthTokenToIndividualResponse {
   The recovery codes for the Individual to write down
   """
   recoveryCodes: [String]
-}
-
-"""
-A two factor authentication method
-"""
-enum TwoFactorMethod {
-  TOTP
-  YUBIKEY_OTP
 }
 
 input AccountUpdateInput {
